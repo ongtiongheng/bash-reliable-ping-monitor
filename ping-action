@@ -1,0 +1,64 @@
+# ping-test.sh
+#
+#!/bin/bash
+# ping with 3 packets, each at 3 seconds interval/
+# slow and steady
+# Timed 6 seconds for reachable host and 16 seconds for latter
+#
+ping -c3 -i3 $1
+if [ $? -eq 0 ]
+then echo "pass" 
+else sendmail.sh $1
+fi
+
+# sendmail.sh
+#
+#!/bin/bash 
+#
+# warning - private stuff here do not copy and paste
+#
+# arg1 = router ip address/hostname
+#
+arg1=$1
+DATE=`date +%T`
+serverlist[0]="server1"
+serverlist[1]="server2"
+rand=$[$RANDOM % 2]
+     ( 
+        sleep 1 
+        echo helo a 
+        sleep 1 
+        echo mail from:\<\> 
+        sleep 1 
+        echo rcpt to:ongtiongheng@gmail.com
+        sleep 1 
+        echo rcpt to:anotherperson@gmail.com
+        sleep 1 
+        echo data 
+        echo "From: Nagios@company.com"
+        echo "To: Helpdesk@company.com"
+	echo "MIME-Version: 1.0" 
+	echo "Subject: [Critical] $DATE Alert ~ WHAT-SERVICE monitor cannot reach $1" 
+	echo "From: $from"
+	echo "To: ongtiongheng@gmail.com"
+	echo "Content-Type: multipart/mixed; boundary=sep"
+        echo "X-Priority: 1 (Highest)"
+        echo "X-MSMail-Priority: High"
+	echo "--sep"
+	echo "Content-Type: text/plain; charset=UTF-8"
+        echo ####
+        echo ""
+	echo "Table of Content"
+	echo "1) server 1 ip address"
+	echo "2) server 2 ip address"
+	echo "3) router 1 ip address"
+	echo "4) switch 1 ip address"
+        echo ""
+        echo ""
+	echo "Helpdesk action item: Call the above team for break-fix"
+        echo ""
+        echo . 
+        sleep 5 
+        echo quit
+   ) | telnet ${serverlist[$rand]} 25
+
